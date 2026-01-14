@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Suffixer for Students</title>
+    <style>
+      :root {
+        --primary: #2563eb;
+        --bg: #f8fafc;
+        --text: #1e293b;
+      }
+      body {
+        font-family: sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        color: var(--primary);
+        text-align: center;
+      }
+      .container {
+        display: grid;
+        gap: 20px;
+      }
+
+      /* Input Areas */
+      label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+      }
+      textarea {
+        width: 100%;
+        height: 150px;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-family: monospace;
+        resize: vertical;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+      }
+
+      /* Button */
+      button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      /* Results Area */
+      #results-area {
+        margin-top: 20px;
+        border-top: 2px solid #e2e8f0;
+        padding-top: 20px;
+        display: none;
+      }
+      .student-block {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .student-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 5px;
+      }
+      .copy-btn {
+        background: #10b981;
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      pre {
+        background: #1e293b;
+        color: #a5f3fc;
+        padding: 10px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Universal Variable Suffixer</h1>
+    <p style="text-align: center; color: #64748b">
+      Paste your code, enter Student IDs, and generate unique versions
+      instantly.
+    </p>
+
+    <div class="container">
+      <div>
+        <label>1. Source Code (C++, Java, Python, etc.)</label>
+        <textarea id="sourceCode" placeholder="// Paste your code here...">
+#include <iostream>
+using namespace std;
+
+int main() {
+    int score = 100;
+    int total = 50;
+    if (score > total) {
+        cout << score << endl;
+    }
+    return 0;
+}</textarea
+        >
+      </div>
+
+      <div>
+        <label>2. Student IDs (Separate by comma or new line)</label>
+        <textarea
+          id="studentIds"
+          placeholder="202201005, 202201006, 202201999"
+          style="height: 80px"
+        ></textarea>
+      </div>
+
+      <button onclick="generateCode()">Generate Student Versions</button>
+
+      <div id="results-area"></div>
+    </div>
+
+    <script>
+      // Reserved keywords to IGNORE (C++, Java, Python, C common words)
+      const reservedKeywords = new Set([
+        "int",
+        "float",
+        "double",
+        "char",
+        "string",
+        "String",
+        "bool",
+        "void",
+        "auto",
+        "if",
+        "else",
+        "for",
+        "while",
+        "do",
+        "switch",
+        "case",
+        "break",
+        "continue",
+        "return",
+        "true",
+        "false",
+        "NULL",
+        "nullptr",
+        "class",
+        "struct",
+        "public",
+        "private",
+        "protected",
+        "static",
+        "const",
+        "new",
+        "delete",
+        "using",
+        "namespace",
+        "include",
+        "iostream",
+        "stdio",
+        "main",
+        "std",
+        "cout",
+        "cin",
+        "printf",
+        "scanf",
+        "vector",
+        "map",
+        "list",
+        "import",
+        "def",
+        "print",
+        "range",
+        "len",
+        "alignas",
+        "alignof",
+        "and",
+        "and_eq",
+        "asm",
+        "atomic_cancel",
+        "atomic_commit",
+        "atomic_noexcept",
+        "bitand",
+        "bitor",
+        "catch",
+        "char16_t",
+        "char32_t",
+        "char8_t",
+        "co_await",
+        "co_return",
+        "co_yield",
+        "compl",
+        "concept",
+        "const_cast",
+        "consteval",
+        "constexpr",
+        "constinit",
+        "decltype",
+        "default",
+        "dynamic_cast",
+        "enum",
+        "explicit",
+        "export",
+        "extern",
+        "friend",
+        "goto",
+        "inline",
+        "long",
+        "mutable",
+        "noexcept",
+        "not",
+        "not_eq",
+        "operator",
+        "or",
+        "or_eq",
+        "reinterpret_cast",
+        "requires",
+        "short",
+        "signed",
+        "sizeof",
+        "static_assert",
+        "static_cast",
+        "synchronized",
+        "template",
+        "this",
+        "thread_local",
+        "throw",
+        "try",
+        "typedef",
+        "typeid",
+        "typename",
+        "union",
+        "unsigned",
+        "virtual",
+        "volatile",
+        "wchar_t",
+        "xor",
+        "xor_eq",
+      ]);
+
+      function generateCode() {
+        const source = document.getElementById("sourceCode").value;
+        const idsRaw = document.getElementById("studentIds").value;
+        const outputArea = document.getElementById("results-area");
+
+        // Clear previous results
+        outputArea.innerHTML = "<h3>Generated Versions:</h3>";
+        outputArea.style.display = "block";
+
+        // Parse IDs
+        const ids = idsRaw.split(/[\s,]+/).filter((id) => id.length > 0);
+
+        if (ids.length === 0) {
+          alert("Please enter at least one Student ID.");
+          return;
+        }
+
+        // Regex for variables: Starts with letter/_, contains alphanumeric/_
+        // Note: This regex finds whole words only
+        const variablePattern = /\b[a-zA-Z_][a-zA-Z0-9_]*\b/g;
+
+        ids.forEach((id) => {
+          const suffix = id.slice(-3); // Last 3 digits
+
+          // Replace logic
+          const newCode = source.replace(variablePattern, (match) => {
+            if (reservedKeywords.has(match)) return match; // Skip keywords
+            return `${match}_${suffix}`; // Append suffix
+          });
+
+          // Create Result Element
+          const block = document.createElement("div");
+          block.className = "student-block";
+          block.innerHTML = `
+                    <div class="student-header">
+                        <strong>Student ID: ${id} (Suffix: _${suffix})</strong>
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy Code</button>
+                    </div>
+                    <pre>${escapeHtml(newCode)}</pre>
+                `;
+          outputArea.appendChild(block);
+        });
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function copyToClipboard(btn) {
+        const code = btn.parentElement.nextElementSibling.innerText;
+        navigator.clipboard.writeText(code);
+        const originalText = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => (btn.innerText = originalText), 2000);
+      }
+    </script>
+  </body>
+</html>
